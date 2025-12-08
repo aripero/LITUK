@@ -18,18 +18,33 @@
         <header class="header">
             <div class="header-top">
                 <h1>Life in the UK Test Prep</h1>
-                <button class="pdf-btn" onclick="openPDF()" title="Open Official Guide PDF">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                        <polyline points="10 9 9 9 8 9"></polyline>
-                    </svg>
-                    <span>PDF</span>
-                </button>
+                <div class="header-actions">
+                    <button class="pdf-btn" onclick="openPDF()" title="Open Official Guide PDF">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        <span class="pdf-btn-text">PDF</span>
+                    </button>
+                    <div id="auth-user-info" class="auth-user-info" style="display: none;">
+                        <img id="user-avatar" class="user-avatar" src="" alt="User avatar">
+                        <span id="user-name" class="user-name"></span>
+                        <button class="logout-btn" onclick="handleLogout()" title="Sign out">Sign Out</button>
+                    </div>
+                    <button id="login-btn" class="login-btn" onclick="handleLogin()" style="display: none;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                            <polyline points="10 17 15 12 10 7"></polyline>
+                            <line x1="15" y1="12" x2="3" y2="12"></line>
+                        </svg>
+                        <span>Sign in with Google</span>
+                    </button>
+                </div>
             </div>
-            <nav class="nav-tabs">
+            <nav class="nav-tabs" id="main-nav" style="display: none;">
                 <button class="nav-tab active" data-section="home">Home</button>
                 <button class="nav-tab" data-section="learn">Learn</button>
                 <button class="nav-tab" data-section="practice">Practice</button>
@@ -37,6 +52,27 @@
                 <button class="nav-tab" data-section="progress">Progress</button>
             </nav>
         </header>
+
+        <!-- Login Screen -->
+        <div id="login-screen" class="login-screen">
+            <div class="login-container">
+                <h2>Life in the UK Test Prep</h2>
+                <p>Please sign in with your Google account to continue</p>
+                <button class="btn btn-primary btn-large" onclick="handleLogin()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                        <polyline points="10 17 15 12 10 7"></polyline>
+                        <line x1="15" y1="12" x2="3" y2="12"></line>
+                    </svg>
+                    Sign in with Google
+                </button>
+                <div id="login-error" class="login-error" style="display: none;"></div>
+                <div id="login-loading" class="login-loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Signing in...</p>
+                </div>
+            </div>
+        </div>
 
         <!-- Home Section -->
         <section id="home" class="section active">
@@ -208,6 +244,17 @@
         </section>
     </div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Configuration and Logic -->
+    <script src="firebase-config.js"></script>
+    <script src="firebase-auth.js"></script>
+    <script src="firebase-db.js"></script>
+    
+    <!-- App Scripts -->
     <script src="content.js"></script>
     <script src="questions.js"></script>
     <script src="app.js"></script>

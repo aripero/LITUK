@@ -11,12 +11,17 @@ let currentChapter = null;
 let currentPractice = null;
 let practiceQuestionIndex = 0;
 
+// Authentication state
+let isUserAuthenticated = false;
+let currentUserId = null;
+let userDataUnsubscribe = null;
+
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
-    initializeApp();
-    setupNavigation();
-    loadProgress();
-    updateHomeStats();
+    // Wait for Firebase to initialize, then set up auth listener
+    setTimeout(() => {
+        setupAuthListener();
+    }, 100);
 });
 
 function initializeApp() {
@@ -685,26 +690,179 @@ function updateHomeStats() {
     }
 }
 
-// Local Storage
-function saveProgress() {
-    const progress = {
-        testResults: testResults,
-        failedQuestions: failedQuestions,
-        lastUpdated: Date.now()
-    };
-    localStorage.setItem('lifeInUKProgress', JSON.stringify(progress));
+// Authentication Setup
+function setupAuthListener() {
+    onAuthStateChange((user, isAuthorized, errorMessage) => {
+        if (user && isAuthorized) {
+            // User is authenticated and authorized
+            isUserAuthenticated = true;
+            currentUserId = user.uid;
+            
+            // Clear localStorage (start fresh)
+            localStorage.removeItem('lifeInUKProgress');
+            
+            // Save user profile
+            saveUserProfile(user.uid, {
+                email: user.email,
+                displayName: user.displayName,
+                photoURL: user.photoURL
+            });
+            
+            // Load user data from Firestore
+            loadUserProgress(user.uid)
+                .then((data) => {
+                    testResults = data.testResults || [];
+                    failedQuestions = data.failedQuestions || [];
+                    
+                    // Set up real-time listener for data changes
+                    if (userDataUnsubscribe) {
+                        userDataUnsubscribe();
+                    }
+                    userDataUnsubscribe = subscribeToUserData(user.uid, (data) => {
+                        testResults = data.testResults || [];
+                        failedQuestions = data.failedQuestions || [];
+                        updateHomeStats();
+                        displayProgress();
+                    });
+                    
+                    // Initialize app
+                    showAuthenticatedUI(user);
+                    initializeApp();
+                    setupNavigation();
+                    updateHomeStats();
+                })
+                .catch((error) => {
+                    console.error('Error loading user progress:', error);
+                    showError('Error loading your data. Please refresh the page.');
+                });
+        } else {
+            // User is not authenticated or not authorized
+            isUserAuthenticated = false;
+            currentUserId = null;
+            
+            // Unsubscribe from data changes
+            if (userDataUnsubscribe) {
+                userDataUnsubscribe();
+                userDataUnsubscribe = null;
+            }
+            
+            // Clear app state
+            testResults = [];
+            failedQuestions = [];
+            
+            // Show login screen
+            showLoginUI(errorMessage);
+        }
+    });
 }
 
-function loadProgress() {
-    const saved = localStorage.getItem('lifeInUKProgress');
-    if (saved) {
-        try {
-            const progress = JSON.parse(saved);
-            testResults = progress.testResults || [];
-            failedQuestions = progress.failedQuestions || [];
-        } catch (e) {
-            console.error('Error loading progress:', e);
+// Show authenticated UI
+function showAuthenticatedUI(user) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('main-nav').style.display = 'flex';
+    document.getElementById('login-btn').style.display = 'none';
+    document.getElementById('login-loading').style.display = 'none';
+    document.getElementById('login-error').style.display = 'none';
+    
+    const authUserInfo = document.getElementById('auth-user-info');
+    authUserInfo.style.display = 'flex';
+    document.getElementById('user-avatar').src = user.photoURL || '';
+    document.getElementById('user-name').textContent = user.displayName || user.email;
+}
+
+// Show login UI
+function showLoginUI(errorMessage) {
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('main-nav').style.display = 'none';
+    document.getElementById('auth-user-info').style.display = 'none';
+    document.getElementById('login-btn').style.display = 'block';
+    
+    const loginError = document.getElementById('login-error');
+    if (errorMessage) {
+        loginError.textContent = errorMessage;
+        loginError.style.display = 'block';
+    } else {
+        loginError.style.display = 'none';
+    }
+}
+
+// Handle login
+async function handleLogin() {
+    const loginLoading = document.getElementById('login-loading');
+    const loginError = document.getElementById('login-error');
+    
+    try {
+        loginLoading.style.display = 'block';
+        loginError.style.display = 'none';
+        
+        await signInWithGoogle();
+        // Auth state change will be handled by onAuthStateChange listener
+        // Loading will be hidden when login screen is hidden in showAuthenticatedUI()
+    } catch (error) {
+        console.error('Login error:', error);
+        loginLoading.style.display = 'none';
+        let errorMessage = 'Failed to sign in. Please try again.';
+        if (error.code === 'auth/popup-blocked') {
+            errorMessage = 'Popup was blocked. Please allow popups for this site and try again.';
+        } else if (error.code === 'auth/popup-closed-by-user') {
+            errorMessage = 'Sign-in was cancelled. Please try again.';
         }
+        loginError.textContent = errorMessage;
+        loginError.style.display = 'block';
+    }
+}
+
+// Handle logout
+async function handleLogout() {
+    try {
+        if (userDataUnsubscribe) {
+            userDataUnsubscribe();
+            userDataUnsubscribe = null;
+        }
+        
+        await signOut();
+        // Auth state change will be handled by onAuthStateChange listener
+    } catch (error) {
+        console.error('Logout error:', error);
+        showError('Failed to sign out. Please try again.');
+    }
+}
+
+// Show error message
+function showError(message) {
+    const loginError = document.getElementById('login-error');
+    loginError.textContent = message;
+    loginError.style.display = 'block';
+}
+
+// Save Progress (Firestore)
+async function saveProgress() {
+    if (!isUserAuthenticated || !currentUserId) {
+        console.warn('Cannot save progress: user not authenticated');
+        return;
+    }
+    
+    try {
+        await saveUserProgress(currentUserId, testResults, failedQuestions);
+    } catch (error) {
+        console.error('Error saving progress:', error);
+        // Don't show error to user, just log it (offline persistence will handle it)
+    }
+}
+
+// Load Progress (Firestore) - Called on login
+async function loadProgress() {
+    if (!isUserAuthenticated || !currentUserId) {
+        return;
+    }
+    
+    try {
+        const data = await loadUserProgress(currentUserId);
+        testResults = data.testResults || [];
+        failedQuestions = data.failedQuestions || [];
+    } catch (error) {
+        console.error('Error loading progress:', error);
+        throw error;
     }
 }
 
