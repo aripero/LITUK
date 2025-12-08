@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Study and practice for the Life in the UK test">
+    <meta name="theme-color" content="#1e40af">
+    <title>Life in the UK Test Prep</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-top">
+                <h1>Life in the UK Test Prep</h1>
+                <button class="pdf-btn" onclick="openPDF()" title="Open Official Guide PDF">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    <span>PDF</span>
+                </button>
+            </div>
+            <nav class="nav-tabs">
+                <button class="nav-tab active" data-section="home">Home</button>
+                <button class="nav-tab" data-section="learn">Learn</button>
+                <button class="nav-tab" data-section="practice">Practice</button>
+                <button class="nav-tab" data-section="test">Test</button>
+                <button class="nav-tab" data-section="progress">Progress</button>
+            </nav>
+        </header>
+
+        <!-- Home Section -->
+        <section id="home" class="section active">
+            <div class="home-content">
+                <div class="welcome-card">
+                    <h2>Welcome to Life in the UK Test Prep</h2>
+                    <p>Prepare for your Life in the UK test with interactive learning and practice tests.</p>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-tests">0</div>
+                        <div class="stat-label">Tests Completed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avg-score">0%</div>
+                        <div class="stat-label">Average Score</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="readiness">Not Ready</div>
+                        <div class="stat-label">Exam Readiness</div>
+                    </div>
+                </div>
+                <div class="quick-actions">
+                    <button class="btn btn-primary" onclick="showSection('learn')">Start Learning</button>
+                    <button class="btn btn-secondary" onclick="showSection('test')">Take Practice Test</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Learn Section -->
+        <section id="learn" class="section">
+            <div class="learn-content">
+                <div class="chapter-list" id="chapter-list"></div>
+                <div class="chapter-content" id="chapter-content" style="display: none;">
+                    <button class="back-btn" onclick="showChapterList()">← Back to Chapters</button>
+                    <div id="chapter-text"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Practice Section -->
+        <section id="practice" class="section">
+            <div class="practice-container">
+                <div id="practice-start" class="practice-start">
+                    <h2>Practice Mode</h2>
+                    <p>Practice with any number of questions at your own pace. No timer, no pressure!</p>
+                    <div class="practice-input">
+                        <label for="question-count">Number of questions:</label>
+                        <input type="number" id="question-count" min="1" max="500" value="50" />
+                        <p class="hint">Enter how many questions you'd like to practice (1-500)</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="startPractice()">Start Practice</button>
+                </div>
+                <div id="practice-active" class="practice-active" style="display: none;">
+                    <div class="practice-header">
+                        <div class="practice-progress">
+                            <span>Question <span id="practice-current-num">1</span> of <span id="practice-total">50</span></span>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="practice-progress-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="question-container">
+                        <h3 id="practice-question-text"></h3>
+                        <div id="practice-answer-options" class="answer-options"></div>
+                        <div id="practice-question-feedback" class="question-feedback" style="display: none;"></div>
+                        <div class="practice-navigation">
+                            <button class="btn btn-secondary" id="practice-prev-btn" onclick="previousPracticeQuestion()" style="display: none;">← Previous Question</button>
+                            <button class="btn btn-primary" id="practice-next-btn" onclick="nextPracticeQuestion()" style="display: none;">Next Question</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="practice-results" class="practice-results" style="display: none;">
+                    <h2>Practice Complete!</h2>
+                    <div class="score-display">
+                        <div class="score-circle">
+                            <span id="practice-final-score">0</span>%
+                        </div>
+                    </div>
+                    <div class="results-details">
+                        <p>Correct: <span id="practice-correct-count">0</span>/<span id="practice-total-answered">0</span></p>
+                        <p>Incorrect: <span id="practice-incorrect-count">0</span></p>
+                    </div>
+                    <div class="results-actions">
+                        <button class="btn btn-primary" onclick="startPractice()">Practice Again</button>
+                        <button class="btn btn-secondary" onclick="showSection('progress')">View Progress</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Test Section -->
+        <section id="test" class="section">
+            <div class="test-container">
+                <div id="test-start" class="test-start">
+                    <h2>Practice Test</h2>
+                    <p>The official test consists of 24 multiple-choice questions. You have 45 minutes to complete it.</p>
+                    <p>You need to score at least 75% (18 correct answers) to pass.</p>
+                    <button class="btn btn-primary" onclick="startNewTest()">Start New Test</button>
+                    <div id="failed-questions-section" style="display: none;">
+                        <h3>Review Failed Questions</h3>
+                        <button class="btn btn-secondary" onclick="reviewFailedQuestions()">Review Failed Questions</button>
+                    </div>
+                </div>
+                <div id="test-active" class="test-active" style="display: none;">
+                    <div class="test-header">
+                        <div class="test-progress">
+                            <span>Question <span id="current-question-num">1</span> of <span id="total-questions">24</span></span>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-fill"></div>
+                            </div>
+                        </div>
+                        <div class="test-timer">
+                            <span id="timer">45:00</span>
+                        </div>
+                    </div>
+                    <div class="question-container">
+                        <h3 id="question-text"></h3>
+                        <div id="answer-options" class="answer-options"></div>
+                        <div id="question-feedback" class="question-feedback" style="display: none;"></div>
+                        <button class="btn btn-primary" id="next-question-btn" onclick="nextQuestion()" style="display: none;">Next Question</button>
+                    </div>
+                </div>
+                <div id="test-results" class="test-results" style="display: none;">
+                    <h2>Test Results</h2>
+                    <div class="score-display">
+                        <div class="score-circle">
+                            <span id="final-score">0</span>%
+                        </div>
+                        <p id="pass-fail"></p>
+                    </div>
+                    <div class="results-details">
+                        <p>Correct: <span id="correct-count">0</span>/24</p>
+                        <p>Incorrect: <span id="incorrect-count">0</span></p>
+                    </div>
+                    <div class="results-actions">
+                        <button class="btn btn-primary" onclick="startNewTest()">Take Another Test</button>
+                        <button class="btn btn-secondary" onclick="reviewTest()">Review Answers</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Progress Section -->
+        <section id="progress" class="section">
+            <div class="progress-content">
+                <h2>Your Progress</h2>
+                <div class="readiness-card">
+                    <h3>Exam Readiness</h3>
+                    <div class="readiness-indicator">
+                        <div class="readiness-bar">
+                            <div class="readiness-fill" id="readiness-bar-fill"></div>
+                        </div>
+                        <p id="readiness-text">Start taking practice tests to assess your readiness</p>
+                    </div>
+                </div>
+                <div class="failed-questions-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                        <h3 style="margin: 0;">Failed Questions (<span id="failed-count">0</span>)</h3>
+                        <button class="btn btn-secondary" id="retake-failed-btn" onclick="retakeFailedQuestions()" style="display: none;">Retake Test</button>
+                    </div>
+                    <div id="failed-questions-list"></div>
+                </div>
+                <div class="test-history">
+                    <h3>Test History</h3>
+                    <div id="test-history-list"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="content.js"></script>
+    <script src="questions.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(reg => console.log('Service Worker registered'))
+                    .catch(err => console.log('Service Worker registration failed'));
+            });
+        }
+    </script>
+</body>
+</html>
+
