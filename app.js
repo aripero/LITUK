@@ -816,6 +816,7 @@ function showLoginUI(errorMessage) {
     document.getElementById('main-nav').style.display = 'none';
     document.getElementById('auth-user-info').style.display = 'none';
     document.getElementById('login-btn').style.display = 'block';
+    document.getElementById('login-loading').style.display = 'none'; // Always hide loading when showing login UI
     
     const loginError = document.getElementById('login-error');
     if (errorMessage) {
@@ -832,12 +833,15 @@ async function handleLogin() {
     const loginError = document.getElementById('login-error');
     
     try {
+        console.log('Starting Google sign-in...');
         loginLoading.style.display = 'block';
         loginError.style.display = 'none';
         
         await signInWithGoogle();
+        console.log('Google sign-in successful, waiting for auth state change...');
         // Auth state change will be handled by onAuthStateChange listener
         // Loading will be hidden when login screen is hidden in showAuthenticatedUI()
+        // or when showLoginUI is called with an error
     } catch (error) {
         console.error('Login error:', error);
         loginLoading.style.display = 'none';
@@ -846,6 +850,8 @@ async function handleLogin() {
             errorMessage = 'Popup was blocked. Please allow popups for this site and try again.';
         } else if (error.code === 'auth/popup-closed-by-user') {
             errorMessage = 'Sign-in was cancelled. Please try again.';
+        } else if (error.code === 'auth/network-request-failed') {
+            errorMessage = 'Network error. Please check your internet connection and try again.';
         }
         loginError.textContent = errorMessage;
         loginError.style.display = 'block';

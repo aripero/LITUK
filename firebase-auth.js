@@ -38,20 +38,29 @@ auth.onAuthStateChanged((user) => {
 // Check if email is in whitelist
 async function checkEmailWhitelist(email) {
   try {
+    console.log('Checking whitelist for email:', email);
     const whitelistRef = db.collection('config').doc('authorizedUsers');
     const doc = await whitelistRef.get();
     
     if (!doc.exists) {
-      console.warn('Whitelist document does not exist');
+      console.warn('Whitelist document does not exist in Firestore. Please create it at config/authorizedUsers');
+      console.warn('Document structure should be: { emails: ["email1@example.com", "email2@example.com"] }');
       return false;
     }
     
     const data = doc.data();
     const authorizedEmails = data.emails || [];
     
-    return authorizedEmails.includes(email.toLowerCase());
+    console.log('Authorized emails:', authorizedEmails);
+    console.log('Checking if', email.toLowerCase(), 'is in whitelist');
+    
+    const isAuthorized = authorizedEmails.includes(email.toLowerCase());
+    console.log('Authorization result:', isAuthorized);
+    
+    return isAuthorized;
   } catch (error) {
     console.error('Error checking whitelist:', error);
+    console.error('Error details:', error.message, error.code);
     throw error;
   }
 }
