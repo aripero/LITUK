@@ -152,3 +152,4 @@ The app will then work like a native app!
 - All JavaScript files must be served from the same origin
 - Test the app on actual devices, not just emulators
 
+
