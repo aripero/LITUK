@@ -3,12 +3,12 @@
 // Get this from: Firebase Console → Project Settings → Your apps → Web app
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyADfSOuQk7jblnL11I-PV5hRTyghuWhmwc",
+  authDomain: "lituk-db.firebaseapp.com",
+  projectId: "lituk-db",
+  storageBucket: "lituk-db.firebasestorage.app",
+  messagingSenderId: "1059650682484",
+  appId: "1:1059650682484:web:e3829e43d0fed634d59b21"
 };
 
 // Initialize Firebase
