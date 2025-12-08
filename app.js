@@ -18,10 +18,39 @@ let userDataUnsubscribe = null;
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
+    // Hide app content initially until auth is verified
+    const appContainer = document.getElementById('app-container');
+    const loginScreen = document.getElementById('login-screen');
+    
+    if (appContainer) appContainer.style.display = 'none';
+    if (loginScreen) loginScreen.style.display = 'flex';
+    
     // Wait for Firebase to initialize, then set up auth listener
     setTimeout(() => {
+        // Check if Firebase is loaded
+        if (typeof firebase === 'undefined') {
+            console.error('Firebase is not loaded. Check if Firebase SDK scripts are loading correctly.');
+            const loginError = document.getElementById('login-error');
+            if (loginError) {
+                loginError.textContent = 'Error loading Firebase. Please refresh the page.';
+                loginError.style.display = 'block';
+            }
+            return;
+        }
+        
+        // Check if auth is available
+        if (typeof auth === 'undefined') {
+            console.error('Firebase Auth is not initialized. Check firebase-config.js');
+            const loginError = document.getElementById('login-error');
+            if (loginError) {
+                loginError.textContent = 'Error initializing authentication. Please refresh the page.';
+                loginError.style.display = 'block';
+            }
+            return;
+        }
+        
         setupAuthListener();
-    }, 100);
+    }, 500); // Increased timeout to ensure Firebase scripts are loaded
 });
 
 function initializeApp() {
@@ -759,6 +788,7 @@ function setupAuthListener() {
 // Show authenticated UI
 function showAuthenticatedUI(user) {
     document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-container').style.display = 'flex'; // Show app content
     document.getElementById('main-nav').style.display = 'flex';
     document.getElementById('login-btn').style.display = 'none';
     document.getElementById('login-loading').style.display = 'none';
@@ -773,6 +803,7 @@ function showAuthenticatedUI(user) {
 // Show login UI
 function showLoginUI(errorMessage) {
     document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app-container').style.display = 'none'; // Hide app content
     document.getElementById('main-nav').style.display = 'none';
     document.getElementById('auth-user-info').style.display = 'none';
     document.getElementById('login-btn').style.display = 'block';
