@@ -53,27 +53,6 @@
             </nav>
         </header>
 
-        <!-- Login Screen -->
-        <div id="login-screen" class="login-screen">
-            <div class="login-container">
-                <h2>Life in the UK Test Prep</h2>
-                <p>Please sign in with your Google account to continue</p>
-                <button class="btn btn-primary btn-large" onclick="handleLogin()">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-                        <polyline points="10 17 15 12 10 7"></polyline>
-                        <line x1="15" y1="12" x2="3" y2="12"></line>
-                    </svg>
-                    Sign in with Google
-                </button>
-                <div id="login-error" class="login-error" style="display: none;"></div>
-                <div id="login-loading" class="login-loading" style="display: none;">
-                    <div class="spinner"></div>
-                    <p>Signing in...</p>
-                </div>
-            </div>
-        </div>
-
         <!-- Home Section -->
         <section id="home" class="section active">
             <div class="home-content">
@@ -242,6 +221,27 @@
                 </div>
             </div>
         </section>
+    </div>
+
+    <!-- Login Screen (outside app-container) -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-container">
+            <h2>Life in the UK Test Prep</h2>
+            <p>Please sign in with your Google account to continue</p>
+            <button class="btn btn-primary btn-large" onclick="handleLogin()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                    <polyline points="10 17 15 12 10 7"></polyline>
+                    <line x1="15" y1="12" x2="3" y2="12"></line>
+                </svg>
+                Sign in with Google
+            </button>
+            <div id="login-error" class="login-error" style="display: none;"></div>
+            <div id="login-loading" class="login-loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Signing in...</p>
+            </div>
+        </div>
     </div>
 
     <!-- Firebase SDK -->
