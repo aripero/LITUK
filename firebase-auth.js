@@ -70,10 +70,26 @@ auth.onAuthStateChanged(async (user) => {
     // Check if we have a pending error message (from whitelist check)
     const lastWhitelistError = sessionStorage.getItem('whitelistError');
     console.log('Checking for whitelist error:', lastWhitelistError);
+    
     if (lastWhitelistError) {
       sessionStorage.removeItem('whitelistError');
       console.log('Notifying auth state change with error:', lastWhitelistError);
       notifyAuthStateChange(null, false, lastWhitelistError);
+      
+      // Direct fallback: If no listeners are registered yet, show error directly
+      if (authStateListeners.length === 0) {
+        console.log('No listeners registered yet, showing error directly');
+        setTimeout(() => {
+          const loginScreen = document.getElementById('login-screen');
+          const loginError = document.getElementById('login-error');
+          if (loginScreen && loginError) {
+            loginScreen.style.display = 'flex';
+            loginError.textContent = lastWhitelistError;
+            loginError.style.display = 'block';
+            if (loginLoading) loginLoading.style.display = 'none';
+          }
+        }, 100);
+      }
     } else {
       console.log('No error message, notifying normal sign out');
       notifyAuthStateChange(null, false);

@@ -58,7 +58,25 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
+        console.log('Setting up auth listener...');
         setupAuthListener();
+        
+        // Check if there's a pending error from before listener was set up
+        const pendingError = sessionStorage.getItem('whitelistError');
+        if (pendingError) {
+            console.log('Found pending error, triggering auth state change');
+            sessionStorage.removeItem('whitelistError');
+            // Trigger a check by getting current user
+            const currentUser = auth.currentUser;
+            if (!currentUser) {
+                // Manually trigger the callback
+                onAuthStateChange((user, isAuthorized, errorMsg) => {
+                    if (!user && errorMsg) {
+                        showLoginUI(errorMsg);
+                    }
+                });
+            }
+        }
     }, 500); // Increased timeout to ensure Firebase scripts are loaded
 });
 
