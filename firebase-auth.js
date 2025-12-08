@@ -38,16 +38,22 @@ auth.onAuthStateChanged(async (user) => {
       } else {
         // User is not authorized, sign them out
         console.log('User not authorized:', user.email);
-        const errorMsg = sessionStorage.getItem('whitelistError') || 'Your email is not authorized to access this app.';
+        // Ensure error message is set
+        if (!sessionStorage.getItem('whitelistError')) {
+          sessionStorage.setItem('whitelistError', 'Your email is not authorized to access this app.');
+        }
+        isCheckingWhitelist = false; // Set flag BEFORE signOut to allow handler to run
         await signOut();
-        isCheckingWhitelist = false;
         // The signOut will trigger onAuthStateChanged again with user=null, which will show the error
       }
     } catch (error) {
       console.error('Error checking whitelist:', error);
-      const errorMsg = sessionStorage.getItem('whitelistError') || 'Error verifying authorization. Please try again.';
+      // Ensure error message is set
+      if (!sessionStorage.getItem('whitelistError')) {
+        sessionStorage.setItem('whitelistError', 'Error verifying authorization. Please try again.');
+      }
+      isCheckingWhitelist = false; // Set flag BEFORE signOut to allow handler to run
       await signOut();
-      isCheckingWhitelist = false;
       // The signOut will trigger onAuthStateChanged again with user=null, which will show the error
     }
   } else {
@@ -55,12 +61,21 @@ auth.onAuthStateChanged(async (user) => {
     console.log('User signed out');
     isCheckingWhitelist = false;
     
+    // Always hide loading spinner when signed out
+    const loginLoading = document.getElementById('login-loading');
+    if (loginLoading) {
+      loginLoading.style.display = 'none';
+    }
+    
     // Check if we have a pending error message (from whitelist check)
     const lastWhitelistError = sessionStorage.getItem('whitelistError');
+    console.log('Checking for whitelist error:', lastWhitelistError);
     if (lastWhitelistError) {
       sessionStorage.removeItem('whitelistError');
+      console.log('Notifying auth state change with error:', lastWhitelistError);
       notifyAuthStateChange(null, false, lastWhitelistError);
     } else {
+      console.log('No error message, notifying normal sign out');
       notifyAuthStateChange(null, false);
     }
   }

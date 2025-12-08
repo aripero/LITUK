@@ -799,6 +799,7 @@ function setupAuthListener() {
         } else {
             // User is not authenticated or not authorized
             console.log('User not authenticated or not authorized, showing login UI');
+            console.log('Error message:', errorMessage);
             isUserAuthenticated = false;
             currentUserId = null;
             
@@ -811,6 +812,12 @@ function setupAuthListener() {
             // Clear app state
             testResults = [];
             failedQuestions = [];
+            
+            // Ensure loading spinner is hidden
+            const loginLoading = document.getElementById('login-loading');
+            if (loginLoading) {
+                loginLoading.style.display = 'none';
+            }
             
             // Show login screen
             showLoginUI(errorMessage);
@@ -835,6 +842,7 @@ function showAuthenticatedUI(user) {
 
 // Show login UI
 function showLoginUI(errorMessage) {
+    console.log('showLoginUI called with errorMessage:', errorMessage);
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('app-container').style.display = 'none'; // Hide app content
     document.getElementById('main-nav').style.display = 'none';
@@ -844,9 +852,11 @@ function showLoginUI(errorMessage) {
     
     const loginError = document.getElementById('login-error');
     if (errorMessage) {
+        console.log('Displaying error message:', errorMessage);
         loginError.textContent = errorMessage;
         loginError.style.display = 'block';
     } else {
+        console.log('No error message, hiding error div');
         loginError.style.display = 'none';
     }
 }
