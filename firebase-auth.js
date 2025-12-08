@@ -5,33 +5,56 @@ let currentUser = null;
 let authStateListeners = [];
 
 // Listen for auth state changes
-auth.onAuthStateChanged((user) => {
+let isCheckingWhitelist = false; // Prevent multiple simultaneous checks
+
+auth.onAuthStateChanged(async (user) => {
+  // Prevent re-entry while processing
+  if (isCheckingWhitelist && user) {
+    console.log('Already checking whitelist, skipping...');
+    return;
+  }
+  
   currentUser = user;
   
   if (user) {
     // User is signed in
     console.log('User signed in:', user.email);
-    checkEmailWhitelist(user.email)
-      .then((isAuthorized) => {
-        if (isAuthorized) {
-          // User is authorized, notify listeners
-          notifyAuthStateChange(user, true);
-        } else {
-          // User is not authorized, sign them out
-          console.log('User not authorized:', user.email);
-          signOut();
-          notifyAuthStateChange(null, false, 'Your email is not authorized to access this app.');
-        }
-      })
-      .catch((error) => {
-        console.error('Error checking whitelist:', error);
-        signOut();
-        notifyAuthStateChange(null, false, 'Error verifying authorization. Please try again.');
-      });
+    isCheckingWhitelist = true;
+    
+    try {
+      const isAuthorized = await checkEmailWhitelist(user.email);
+      
+      if (isAuthorized) {
+        // User is authorized, notify listeners
+        console.log('User is authorized, proceeding...');
+        isCheckingWhitelist = false;
+        notifyAuthStateChange(user, true);
+      } else {
+        // User is not authorized, sign them out
+        console.log('User not authorized:', user.email);
+        await signOut();
+        isCheckingWhitelist = false;
+        // Don't call notifyAuthStateChange here - signOut will trigger onAuthStateChanged again
+      }
+    } catch (error) {
+      console.error('Error checking whitelist:', error);
+      await signOut();
+      isCheckingWhitelist = false;
+      // Don't call notifyAuthStateChange here - signOut will trigger onAuthStateChanged again
+    }
   } else {
     // User is signed out
     console.log('User signed out');
-    notifyAuthStateChange(null, false);
+    isCheckingWhitelist = false;
+    
+    // Check if we have a pending error message (from whitelist check)
+    const lastWhitelistError = sessionStorage.getItem('whitelistError');
+    if (lastWhitelistError) {
+      sessionStorage.removeItem('whitelistError');
+      notifyAuthStateChange(null, false, lastWhitelistError);
+    } else {
+      notifyAuthStateChange(null, false);
+    }
   }
 });
 
@@ -40,11 +63,19 @@ async function checkEmailWhitelist(email) {
   try {
     console.log('Checking whitelist for email:', email);
     const whitelistRef = db.collection('config').doc('authorizedUsers');
-    const doc = await whitelistRef.get();
+    
+    // Add timeout to prevent hanging
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Whitelist check timeout')), 10000)
+    );
+    
+    const doc = await Promise.race([whitelistRef.get(), timeoutPromise]);
     
     if (!doc.exists) {
-      console.warn('Whitelist document does not exist in Firestore. Please create it at config/authorizedUsers');
+      const errorMsg = 'Whitelist document does not exist in Firestore. Please create it at config/authorizedUsers';
+      console.warn(errorMsg);
       console.warn('Document structure should be: { emails: ["email1@example.com", "email2@example.com"] }');
+      sessionStorage.setItem('whitelistError', 'Whitelist not configured. Please contact administrator.');
       return false;
     }
     
@@ -57,10 +88,15 @@ async function checkEmailWhitelist(email) {
     const isAuthorized = authorizedEmails.includes(email.toLowerCase());
     console.log('Authorization result:', isAuthorized);
     
+    if (!isAuthorized) {
+      sessionStorage.setItem('whitelistError', 'Your email is not authorized to access this app.');
+    }
+    
     return isAuthorized;
   } catch (error) {
     console.error('Error checking whitelist:', error);
     console.error('Error details:', error.message, error.code);
+    sessionStorage.setItem('whitelistError', 'Error verifying authorization. Please try again.');
     throw error;
   }
 }
