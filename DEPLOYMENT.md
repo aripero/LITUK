@@ -1,35 +1,76 @@
 # Deployment Guide - Life in the UK Test Prep
 
-## Best Options for Mobile Deployment
+## 🚀 Current Deployment: GitHub Pages
 
-### Option 1: GitHub Pages (Recommended - Free & Easy)
+**Repository:** `aripero/LITUK`  
+**Live URL:** `https://aripero.github.io/LITUK/`
 
-**Steps:**
-1. Create a GitHub account (if you don't have one)
-2. Create a new repository (make it public or private)
-3. Upload all files to the repository
-4. Go to Settings → Pages
-5. Select the main branch and save
-6. Your app will be live at: `https://yourusername.github.io/repository-name/`
+### ✅ Setup Complete
 
-**Advantages:**
+Your code is already pushed to GitHub at: `https://github.com/aripero/LITUK`
+
+### 📋 Enable GitHub Pages (One-Time Setup)
+
+**Steps to enable GitHub Pages:**
+
+1. **Go to your repository settings:**
+   - Visit: https://github.com/aripero/LITUK/settings/pages
+   - Or: Go to your repo → Click "Settings" tab → Click "Pages" in left sidebar
+
+2. **Configure the source:**
+   - Under "Source" section:
+     - **Branch:** Select `main`
+     - **Folder:** Select `/ (root)`
+   - Click **"Save"** button
+
+3. **Wait for deployment:**
+   - GitHub will build and deploy your site (usually takes 1-2 minutes)
+   - You'll see a green checkmark when it's ready
+   - A message will appear: "Your site is live at https://aripero.github.io/LITUK/"
+
+4. **Access your app:**
+   - Open: https://aripero.github.io/LITUK/
+   - Share this link with family members
+
+### 🔄 Updating Your App
+
+After making changes to your code:
+
+```bash
+cd "/Users/ariel/Development/Life in the UK"
+git add .
+git commit -m "Your update description"
+git push origin main
+```
+
+GitHub Pages will automatically rebuild and deploy (usually within 1-2 minutes). Your changes will be live at the same URL.
+
+### ✅ Advantages of GitHub Pages
+
 - ✅ Free HTTPS (required for PWA)
 - ✅ Service workers work properly
-- ✅ Can be installed as an app
+- ✅ Can be installed as an app on mobile devices
 - ✅ Easy to update (just push changes)
 - ✅ Shareable link for family
+- ✅ Automatic deployments on every push
 
-**Files to upload:**
-- index.html
-- app.js
-- content.js
-- questions.js
-- styles.css
-- manifest.json
-- service-worker.js
-- icon-192.png (if exists)
-- icon-512.png (if exists)
-- Life in the UK- A guide for new residents.pdf (optional - large file)
+### 📱 Mobile Installation (PWA)
+
+Once your site is live at `https://aripero.github.io/LITUK/`:
+
+1. **Open the app in mobile browser** (Chrome on Android, Safari on iOS)
+2. **Look for "Add to Home Screen" prompt** (appears automatically)
+3. **Or manually:**
+   - **iOS Safari:** Share button → Add to Home Screen
+   - **Android Chrome:** Menu (⋮) → Install App / Add to Home Screen
+
+The app will then work like a native app with offline support!
+
+---
+
+## Alternative Deployment Options
+
+### Option 2: Netlify Drop (Easiest - Drag & Drop)
 
 ---
 
@@ -112,22 +153,13 @@ If you must use file sharing:
 
 ---
 
-## Recommended: GitHub Pages
+## 📝 Notes
 
-**Quick Setup:**
-
-```bash
-# If you have git installed
-cd "/Users/ariel/Development/Life in the UK"
-git init
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
-git push -u origin main
-```
-
-Then enable GitHub Pages in repository settings.
+- The PDF file (~3.2MB) is included in the repository and will be available at the deployed URL
+- Service workers require HTTPS (which GitHub Pages provides automatically)
+- All JavaScript files must be served from the same origin (GitHub Pages handles this)
+- Test the app on actual devices, not just emulators
+- The repository is currently **public** - your code is visible to anyone (but that's fine for this type of app)
 
 ---
 
