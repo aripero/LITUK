@@ -18,12 +18,21 @@ let userDataUnsubscribe = null;
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
-    // Hide app content initially until auth is verified
+    // Ensure app container is hidden and login screen is visible
     const appContainer = document.getElementById('app-container');
     const loginScreen = document.getElementById('login-screen');
     
-    if (appContainer) appContainer.style.display = 'none';
-    if (loginScreen) loginScreen.style.display = 'flex';
+    // Force hide app container (multiple ways to ensure it's hidden)
+    if (appContainer) {
+        appContainer.style.display = 'none';
+        appContainer.setAttribute('data-hidden', 'true');
+    }
+    
+    // Force show login screen
+    if (loginScreen) {
+        loginScreen.style.display = 'flex';
+        loginScreen.style.zIndex = '10000'; // Very high z-index
+    }
     
     // Wait for Firebase to initialize, then set up auth listener
     setTimeout(() => {
