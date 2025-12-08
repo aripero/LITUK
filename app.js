@@ -845,17 +845,37 @@ function setupAuthListener() {
 
 // Show authenticated UI
 function showAuthenticatedUI(user) {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app-container').style.display = 'flex'; // Show app content
-    document.getElementById('main-nav').style.display = 'flex';
-    document.getElementById('login-btn').style.display = 'none';
-    document.getElementById('login-loading').style.display = 'none';
-    document.getElementById('login-error').style.display = 'none';
+    console.log('showAuthenticatedUI called for user:', user?.email);
     
+    // Safely get elements and check if they exist
+    const loginScreen = document.getElementById('login-screen');
+    const appContainer = document.getElementById('app-container');
+    const mainNav = document.getElementById('main-nav');
+    const loginBtn = document.getElementById('login-btn');
+    const loginLoading = document.getElementById('login-loading');
+    const loginError = document.getElementById('login-error');
     const authUserInfo = document.getElementById('auth-user-info');
-    authUserInfo.style.display = 'flex';
-    document.getElementById('user-avatar').src = user.photoURL || '';
-    document.getElementById('user-name').textContent = user.displayName || user.email;
+    const userAvatar = document.getElementById('user-avatar');
+    const userName = document.getElementById('user-name');
+    
+    if (loginScreen) loginScreen.style.display = 'none';
+    if (appContainer) appContainer.style.display = 'flex'; // Show app content
+    if (mainNav) mainNav.style.display = 'flex';
+    if (loginBtn) loginBtn.style.display = 'none';
+    if (loginLoading) loginLoading.style.display = 'none';
+    if (loginError) loginError.style.display = 'none';
+    
+    if (authUserInfo) {
+        authUserInfo.style.display = 'flex';
+    }
+    if (userAvatar && user) {
+        userAvatar.src = user.photoURL || '';
+    }
+    if (userName && user) {
+        userName.textContent = user.displayName || user.email || '';
+    }
+    
+    console.log('showAuthenticatedUI completed');
 }
 
 // Show login UI
