@@ -16,6 +16,12 @@ auth.onAuthStateChanged(async (user) => {
   
   currentUser = user;
   
+  // Always hide loading spinner when auth state changes
+  const loginLoading = document.getElementById('login-loading');
+  if (loginLoading) {
+    loginLoading.style.display = 'none';
+  }
+  
   if (user) {
     // User is signed in
     console.log('User signed in:', user.email);
@@ -32,15 +38,17 @@ auth.onAuthStateChanged(async (user) => {
       } else {
         // User is not authorized, sign them out
         console.log('User not authorized:', user.email);
+        const errorMsg = sessionStorage.getItem('whitelistError') || 'Your email is not authorized to access this app.';
         await signOut();
         isCheckingWhitelist = false;
-        // Don't call notifyAuthStateChange here - signOut will trigger onAuthStateChanged again
+        // The signOut will trigger onAuthStateChanged again with user=null, which will show the error
       }
     } catch (error) {
       console.error('Error checking whitelist:', error);
+      const errorMsg = sessionStorage.getItem('whitelistError') || 'Error verifying authorization. Please try again.';
       await signOut();
       isCheckingWhitelist = false;
-      // Don't call notifyAuthStateChange here - signOut will trigger onAuthStateChanged again
+      // The signOut will trigger onAuthStateChanged again with user=null, which will show the error
     }
   } else {
     // User is signed out

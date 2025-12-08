@@ -731,24 +731,39 @@ function updateHomeStats() {
 // Authentication Setup
 function setupAuthListener() {
     onAuthStateChange((user, isAuthorized, errorMessage) => {
+        console.log('Auth state change callback:', { user: user?.email, isAuthorized, errorMessage });
+        
+        // Always hide loading spinner immediately
+        const loginLoading = document.getElementById('login-loading');
+        if (loginLoading) {
+            loginLoading.style.display = 'none';
+        }
+        
         if (user && isAuthorized) {
             // User is authenticated and authorized
+            console.log('User authenticated and authorized, loading data...');
             isUserAuthenticated = true;
             currentUserId = user.uid;
             
             // Clear localStorage (start fresh)
             localStorage.removeItem('lifeInUKProgress');
             
-            // Save user profile
+            // Save user profile (don't wait for it)
             saveUserProfile(user.uid, {
                 email: user.email,
                 displayName: user.displayName,
                 photoURL: user.photoURL
-            });
+            }).catch(err => console.warn('Error saving user profile:', err));
             
-            // Load user data from Firestore
-            loadUserProgress(user.uid)
+            // Load user data from Firestore with timeout
+            const loadPromise = loadUserProgress(user.uid);
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout loading user data')), 5000)
+            );
+            
+            Promise.race([loadPromise, timeoutPromise])
                 .then((data) => {
+                    console.log('User progress loaded successfully');
                     testResults = data.testResults || [];
                     failedQuestions = data.failedQuestions || [];
                     
@@ -764,6 +779,7 @@ function setupAuthListener() {
                     });
                     
                     // Initialize app
+                    console.log('Showing authenticated UI...');
                     showAuthenticatedUI(user);
                     initializeApp();
                     setupNavigation();
@@ -771,10 +787,18 @@ function setupAuthListener() {
                 })
                 .catch((error) => {
                     console.error('Error loading user progress:', error);
-                    showError('Error loading your data. Please refresh the page.');
+                    // Still show the UI even if loading progress fails
+                    console.log('Showing authenticated UI despite error...');
+                    showAuthenticatedUI(user);
+                    initializeApp();
+                    setupNavigation();
+                    if (error.message !== 'Timeout loading user data') {
+                        showError('Error loading your data. Some features may not work correctly.');
+                    }
                 });
         } else {
             // User is not authenticated or not authorized
+            console.log('User not authenticated or not authorized, showing login UI');
             isUserAuthenticated = false;
             currentUserId = null;
             
