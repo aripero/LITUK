@@ -874,12 +874,43 @@ function showAuthenticatedUI(user) {
     if (userAvatar && user) {
         userAvatar.src = user.photoURL || '';
     }
-    if (userName && user) {
-        userName.textContent = user.displayName || user.email || '';
+    
+    // Update user menu dropdown
+    const userMenuAvatar = document.getElementById('user-menu-avatar');
+    const userMenuName = document.getElementById('user-menu-name');
+    const userMenuEmail = document.getElementById('user-menu-email');
+    
+    if (userMenuAvatar && user) {
+        userMenuAvatar.src = user.photoURL || '';
+    }
+    if (userMenuName && user) {
+        userMenuName.textContent = user.displayName || 'User';
+    }
+    if (userMenuEmail && user) {
+        userMenuEmail.textContent = user.email || '';
     }
     
     console.log('showAuthenticatedUI completed. App container visible:', appContainer?.offsetParent !== null);
 }
+
+// Toggle user menu dropdown
+function toggleUserMenu() {
+    const userMenu = document.getElementById('user-menu');
+    if (userMenu) {
+        userMenu.classList.toggle('show');
+    }
+}
+
+// Close user menu when clicking outside
+document.addEventListener('click', (e) => {
+    const userMenu = document.getElementById('user-menu');
+    const userAvatar = document.getElementById('user-avatar');
+    const userMenuContainer = document.querySelector('.user-menu-container');
+    
+    if (userMenu && userMenuContainer && !userMenuContainer.contains(e.target)) {
+        userMenu.classList.remove('show');
+    }
+});
 
 // Show login UI
 function showLoginUI(errorMessage) {
