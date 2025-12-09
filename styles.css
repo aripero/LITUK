@@ -195,7 +195,7 @@ body {
     right: 0;
     bottom: 0;
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    display: flex !important;
+    display: flex;
     align-items: center;
     justify-content: center;
     z-index: 10000 !important;

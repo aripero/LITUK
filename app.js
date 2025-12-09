@@ -834,8 +834,16 @@ function showAuthenticatedUI(user) {
     const userAvatar = document.getElementById('user-avatar');
     const userName = document.getElementById('user-name');
     
-    if (loginScreen) loginScreen.style.display = 'none';
-    if (appContainer) appContainer.style.display = 'flex'; // Show app content
+    // Hide login screen using setProperty with !important to override any CSS
+    if (loginScreen) {
+        loginScreen.style.setProperty('display', 'none', 'important');
+    }
+    
+    // Show app container
+    if (appContainer) {
+        appContainer.style.display = 'flex';
+    }
+    
     if (mainNav) mainNav.style.display = 'flex';
     if (loginBtn) loginBtn.style.display = 'none';
     if (loginLoading) loginLoading.style.display = 'none';
@@ -857,8 +865,18 @@ function showAuthenticatedUI(user) {
 // Show login UI
 function showLoginUI(errorMessage) {
     console.log('showLoginUI called with errorMessage:', errorMessage);
-    document.getElementById('login-screen').style.display = 'flex';
-    document.getElementById('app-container').style.display = 'none'; // Hide app content
+    const loginScreen = document.getElementById('login-screen');
+    const appContainer = document.getElementById('app-container');
+    
+    // Show login screen using setProperty with !important to ensure it's visible
+    if (loginScreen) {
+        loginScreen.style.setProperty('display', 'flex', 'important');
+    }
+    
+    if (appContainer) {
+        appContainer.style.display = 'none'; // Hide app content
+    }
+    
     document.getElementById('main-nav').style.display = 'none';
     document.getElementById('auth-user-info').style.display = 'none';
     document.getElementById('login-btn').style.display = 'block';
