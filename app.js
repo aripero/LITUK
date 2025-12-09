@@ -837,14 +837,33 @@ function showAuthenticatedUI(user) {
     // Hide login screen using setProperty with !important to override any CSS
     if (loginScreen) {
         loginScreen.style.setProperty('display', 'none', 'important');
+        console.log('Login screen hidden');
+    } else {
+        console.warn('Login screen element not found');
     }
     
-    // Show app container
+    // Show app container with !important to ensure it's visible
     if (appContainer) {
-        appContainer.style.display = 'flex';
+        appContainer.style.setProperty('display', 'flex', 'important');
+        appContainer.removeAttribute('data-hidden');
+        console.log('App container shown, display:', appContainer.style.display);
+    } else {
+        console.error('App container element not found!');
     }
     
-    if (mainNav) mainNav.style.display = 'flex';
+    if (mainNav) {
+        mainNav.style.display = 'flex';
+    }
+    
+    // Ensure home section is active and visible
+    const homeSection = document.getElementById('home');
+    if (homeSection) {
+        homeSection.classList.add('active');
+        console.log('Home section activated');
+    } else {
+        console.warn('Home section element not found');
+    }
+    
     if (loginBtn) loginBtn.style.display = 'none';
     if (loginLoading) loginLoading.style.display = 'none';
     if (loginError) loginError.style.display = 'none';
@@ -859,7 +878,7 @@ function showAuthenticatedUI(user) {
         userName.textContent = user.displayName || user.email || '';
     }
     
-    console.log('showAuthenticatedUI completed');
+    console.log('showAuthenticatedUI completed. App container visible:', appContainer?.offsetParent !== null);
 }
 
 // Show login UI
