@@ -1,5 +1,5 @@
 // Service Worker for offline support
-const CACHE_NAME = 'life-in-uk-test-prep-v1';
+const CACHE_NAME = 'life-in-uk-test-prep-v2';
 const urlsToCache = [
   './',
   './index.html',
@@ -53,15 +53,14 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
-      return Promise.all(
+      return Promise.all(cacheNames.map((cacheName) => {
+        if (cacheName !== CACHE_NAME) => {
+        return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    return caches.delete(cacheName);
+  })
   );
+});
+});
 });
 
