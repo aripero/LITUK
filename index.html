@@ -19,6 +19,16 @@
             <div class="header-top">
                 <h1>Life in the UK Test Prep</h1>
                 <div class="header-actions">
+                    <button class="pdf-btn" onclick="openPDF()" title="Open Official Guide PDF">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        <span class="pdf-btn-text">PDF</span>
+                    </button>
                     <div id="auth-user-info" class="auth-user-info" style="display: none;">
                         <div class="user-menu-container">
                             <img id="user-avatar" class="user-avatar" src="" alt="User avatar" onclick="toggleUserMenu()">
@@ -54,15 +64,6 @@
             </div>
             <nav class="nav-tabs" id="main-nav" style="display: none;">
                 <button class="nav-tab active" data-section="home">Home</button>
-                <button class="nav-tab pdf-nav-btn" onclick="openPDF()" title="Open Official Guide PDF">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                    </svg>
-                    PDF
-                </button>
                 <button class="nav-tab" data-section="learn">Learn</button>
                 <button class="nav-tab" data-section="practice">Practice</button>
                 <button class="nav-tab" data-section="test">Test</button>
