@@ -5,15 +5,7 @@ let currentUser = null;
 let authStateListeners = [];
 
 // Listen for auth state changes
-let isCheckingWhitelist = false; // Prevent multiple simultaneous checks
-
-auth.onAuthStateChanged(async (user) => {
-  // Prevent re-entry while processing
-  if (isCheckingWhitelist && user) {
-    console.log('Already checking whitelist, skipping...');
-    return;
-  }
-  
+auth.onAuthStateChanged((user) => {
   currentUser = user;
   
   // Always hide loading spinner when auth state changes
@@ -23,127 +15,15 @@ auth.onAuthStateChanged(async (user) => {
   }
   
   if (user) {
-    // User is signed in
+    // User is signed in - allow access to anyone with Google account
     console.log('User signed in:', user.email);
-    isCheckingWhitelist = true;
-    
-    try {
-      const isAuthorized = await checkEmailWhitelist(user.email);
-      
-      if (isAuthorized) {
-        // User is authorized, notify listeners
-        console.log('User is authorized, proceeding...');
-        isCheckingWhitelist = false;
-        notifyAuthStateChange(user, true);
-      } else {
-        // User is not authorized, sign them out
-        console.log('User not authorized:', user.email);
-        // Ensure error message is set
-        if (!sessionStorage.getItem('whitelistError')) {
-          sessionStorage.setItem('whitelistError', 'Your email is not authorized to access this app.');
-        }
-        isCheckingWhitelist = false; // Set flag BEFORE signOut to allow handler to run
-        await signOut();
-        // The signOut will trigger onAuthStateChanged again with user=null, which will show the error
-      }
-    } catch (error) {
-      console.error('Error checking whitelist:', error);
-      // Ensure error message is set
-      if (!sessionStorage.getItem('whitelistError')) {
-        sessionStorage.setItem('whitelistError', 'Error verifying authorization. Please try again.');
-      }
-      isCheckingWhitelist = false; // Set flag BEFORE signOut to allow handler to run
-      await signOut();
-      // The signOut will trigger onAuthStateChanged again with user=null, which will show the error
-    }
+    notifyAuthStateChange(user, true);
   } else {
     // User is signed out
     console.log('User signed out');
-    isCheckingWhitelist = false;
-    
-    // Always hide loading spinner when signed out
-    const loginLoading = document.getElementById('login-loading');
-    if (loginLoading) {
-      loginLoading.style.display = 'none';
-    }
-    
-    // Check if we have a pending error message (from whitelist check)
-    const lastWhitelistError = sessionStorage.getItem('whitelistError');
-    console.log('Checking for whitelist error:', lastWhitelistError);
-    
-    if (lastWhitelistError) {
-      sessionStorage.removeItem('whitelistError');
-      console.log('Notifying auth state change with error:', lastWhitelistError);
-      notifyAuthStateChange(null, false, lastWhitelistError);
-      
-      // Direct fallback: Always show error directly as backup
-      console.log('Showing error directly as fallback');
-      setTimeout(() => {
-        const loginScreen = document.getElementById('login-screen');
-        const loginError = document.getElementById('login-error');
-        const loginLoadingEl = document.getElementById('login-loading');
-        if (loginScreen) loginScreen.style.display = 'flex';
-        if (loginError) {
-          loginError.textContent = lastWhitelistError;
-          loginError.style.display = 'block';
-        }
-        if (loginLoadingEl) loginLoadingEl.style.display = 'none';
-        console.log('Error displayed directly:', lastWhitelistError);
-      }, 100);
-      
-      // Also notify listeners if any are registered
-      if (authStateListeners.length > 0) {
-        console.log('Listeners registered, notifying through callback');
-      }
-    } else {
-      console.log('No error message, notifying normal sign out');
-      notifyAuthStateChange(null, false);
-    }
+    notifyAuthStateChange(null, false);
   }
 });
-
-// Check if email is in whitelist
-async function checkEmailWhitelist(email) {
-  try {
-    console.log('Checking whitelist for email:', email);
-    const whitelistRef = db.collection('config').doc('authorizedUsers');
-    
-    // Add timeout to prevent hanging
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Whitelist check timeout')), 10000)
-    );
-    
-    const doc = await Promise.race([whitelistRef.get(), timeoutPromise]);
-    
-    if (!doc.exists) {
-      const errorMsg = 'Whitelist document does not exist in Firestore. Please create it at config/authorizedUsers';
-      console.warn(errorMsg);
-      console.warn('Document structure should be: { emails: ["email1@example.com", "email2@example.com"] }');
-      sessionStorage.setItem('whitelistError', 'Whitelist not configured. Please contact administrator.');
-      return false;
-    }
-    
-    const data = doc.data();
-    const authorizedEmails = data.emails || [];
-    
-    console.log('Authorized emails:', authorizedEmails);
-    console.log('Checking if', email.toLowerCase(), 'is in whitelist');
-    
-    const isAuthorized = authorizedEmails.includes(email.toLowerCase());
-    console.log('Authorization result:', isAuthorized);
-    
-    if (!isAuthorized) {
-      sessionStorage.setItem('whitelistError', 'Your email is not authorized to access this app.');
-    }
-    
-    return isAuthorized;
-  } catch (error) {
-    console.error('Error checking whitelist:', error);
-    console.error('Error details:', error.message, error.code);
-    sessionStorage.setItem('whitelistError', 'Error verifying authorization. Please try again.');
-    throw error;
-  }
-}
 
 // Sign in with Google
 async function signInWithGoogle() {

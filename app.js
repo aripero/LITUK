@@ -60,23 +60,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         console.log('Setting up auth listener...');
         setupAuthListener();
-        
-        // Check if there's a pending error from before listener was set up
-        const pendingError = sessionStorage.getItem('whitelistError');
-        if (pendingError) {
-            console.log('Found pending error, triggering auth state change');
-            sessionStorage.removeItem('whitelistError');
-            // Trigger a check by getting current user
-            const currentUser = auth.currentUser;
-            if (!currentUser) {
-                // Manually trigger the callback
-                onAuthStateChange((user, isAuthorized, errorMsg) => {
-                    if (!user && errorMsg) {
-                        showLoginUI(errorMsg);
-                    }
-                });
-            }
-        }
     }, 500); // Increased timeout to ensure Firebase scripts are loaded
 });
 
@@ -749,7 +732,7 @@ function updateHomeStats() {
 // Authentication Setup
 function setupAuthListener() {
     onAuthStateChange((user, isAuthorized, errorMessage) => {
-        console.log('Auth state change callback:', { user: user?.email, isAuthorized, errorMessage });
+        console.log('Auth state change callback:', { user: user?.email, isAuthorized });
         
         // Always hide loading spinner immediately
         const loginLoading = document.getElementById('login-loading');
@@ -757,9 +740,9 @@ function setupAuthListener() {
             loginLoading.style.display = 'none';
         }
         
-        if (user && isAuthorized) {
-            // User is authenticated and authorized
-            console.log('User authenticated and authorized, loading data...');
+        if (user) {
+            // User is authenticated - allow access to anyone with Google account
+            console.log('User authenticated, loading data...');
             isUserAuthenticated = true;
             currentUserId = user.uid;
             
@@ -815,9 +798,8 @@ function setupAuthListener() {
                     }
                 });
         } else {
-            // User is not authenticated or not authorized
-            console.log('User not authenticated or not authorized, showing login UI');
-            console.log('Error message:', errorMessage);
+            // User is not authenticated
+            console.log('User not authenticated, showing login UI');
             isUserAuthenticated = false;
             currentUserId = null;
             
@@ -831,14 +813,8 @@ function setupAuthListener() {
             testResults = [];
             failedQuestions = [];
             
-            // Ensure loading spinner is hidden
-            const loginLoading = document.getElementById('login-loading');
-            if (loginLoading) {
-                loginLoading.style.display = 'none';
-            }
-            
             // Show login screen
-            showLoginUI(errorMessage);
+            showLoginUI(null);
         }
     });
 }
